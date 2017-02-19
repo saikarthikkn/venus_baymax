@@ -1,4 +1,5 @@
 var Hapi = require('hapi'),
+	bell = require('bell'),
     Wreck = require('wreck'),
     path = require('path'),
     JWT = require('jwt-simple'),
@@ -12,7 +13,7 @@ if (!process.env.STORMPATH_CLIENT_APIKEY_ID) {
 // Create a server with a host and port
 var server = new Hapi.Server({ debug: { request: ['error'] } });
 server.connection({ 
-    host: '0.0.0.0', 
+//    host: '0.0.0.0', 
     port: parseInt(process.env.PORT, 10),
     //protocol: 'https',
     //tls: {} 
@@ -25,9 +26,7 @@ var db = new Datastore({
     autoload: true
 });
 
-// Bell is a third-party authentication plugin for hapi.
-// Register Fitbit as an OAuth 2.0 authentication provider:
-server.register(require('bell'), function(err) {
+server.register(bell, function(err) {
     server.auth.strategy('fitbit', 'bell', {
         provider: {
             protocol: 'oauth2',
@@ -54,12 +53,11 @@ server.register(require('bell'), function(err) {
     });
 });
 
-// Page to start the OAuth 2.0 Authorization Code Grant Flow
 server.route({
     method: 'GET',
     path:'/',
     handler: function (request, reply) {
-        return reply('Go <a href="./signin">here</a> to sign in.');
+        return reply.redirect('/signin');
     }
 });
 
@@ -100,7 +98,9 @@ server.route({
                             }
 
                             // Finally respond to the request
-                            return reply('Signed in as2= ' + request.auth.credentials.profile.displayName + response.json);
+                            console.log (response);
+                            console.log(payload);
+                            return reply('Signed in as3= ' + request.auth.credentials.profile.displayName  + " == " + payload);
                         }
                     );
                 }
